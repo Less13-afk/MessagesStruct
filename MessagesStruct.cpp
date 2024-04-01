@@ -4,6 +4,8 @@ using namespace std;
 enum class MessagesId : unsigned char
 { //Перечисление ID сообщений
 	SysInfo = 1, // ID сообщения MessageHeartBeat
+	GyroInfo, // ID сообщения MessageGyroInfo
+	AccelInfo,// ID сообщения MessageAccelInfo
 	GpsInfo, // ID сообщения MessageGpsInfo
 	InertialInfo,// ID сообщения MessageInertialInfo
 	BatteryInfo,// ID сообщения MessageBatteryInfo
@@ -48,6 +50,7 @@ struct PayloadMessageBatteryInfo // Сообщение с данными о со
 	float voltage; // Текущее напряжение АКБ
 	float amperage; // Текущий ток АКБ
 	float temp; // Температура АКБ
+	float totalPower; // общая потребляемая ПЛК, датчиками, моторами мощность в мА/ч 
 	unsigned long long timeRemaining; // Оставшееся время работы АБК
 	unsigned long long timeusec; // Метка времени
 };
@@ -63,7 +66,22 @@ struct PayloadMessageSysInfo // Сообщения с общими данным�
 };
 struct EnginePowerInfo // Структура описывает информацию о двигателе
 {
-	unsigned char power;
+	unsigned char power; //Текущая нагрузка на моторо от 0 до 100%
+};
+struct PayloadMessageGyroInfo // Сообщение с данными Гироскопа
+{
+	float yawGyroVel; // Угловая скорость по рысканью (рад\с) (Z)
+	float pitchGyroVel; // Угловая скорость по тангажу (рад\с) (Y)
+	float rollGyroVel; // Угловая скорость по крену (рад\с) (X)
+};
+struct PayloadMessageAccelInfo // Сообщение с данными Акселерометра
+{
+	float yawAccelVel; // Угловая скорость по рысканью (рад\с) (Z)
+	float pitchAccelVel; // Угловая скорость по тангажу (рад\с) (Y)
+	float rollAccelVel; // Угловая скорость по крену (рад\с) (X)
+	float aX; // Ускорение по оси X (м\с)
+	float aY; // Ускорение по оси У (м\с)
+	float aZ; // Ускорение по оси Z (м\с)
 };
 struct PayloadMessageGpsInfo // Сообщение с навигационными данными по GPS (частота публикации сообщения – 10 Гц)
 { 
@@ -73,13 +91,15 @@ struct PayloadMessageGpsInfo // Сообщение с навигационным
 	float realAlt; //Высота относительно земли в м
 	float hdop; // Горизонтальная точность сигнала GPS
 	float vdop; // Вертикальная точность сигнала GPS
+	float pdop; // Точность позиционирования по сигналу GPS
 	float noise; // Уровень шума сигнала GPS
 	float jamming; // Урвоень глушения сигнала GPS
 	unsigned char satVisible; // Число видимых спутников GPS
 	unsigned char satUsed; // Число используемых спутников GPS
 	float speed; // Скорость по GPS
 	unsigned char fixType; // Текущий тип позиционирования. NO_GPS – 0, NO_FIX – 1, 2D_FIX – 2, 3D_FIX – 3, DGPS – 4, RTK_FLOAT – 5, RTK_FIXED – 6, STATIC – 7, PPP – 8
-	unsigned long long timeusec; // Метка времени
+	unsigned long long timeusec; // Метка времени ПЛК
+	unsigned long long timeUTC; // Время UTC от GPS спутников
 };
 struct PayloadMessageInertialInfo // Сообщение с навигационными данными по ИНС (частота публикации сообщения – 10 Гц)
 { 
@@ -133,7 +153,6 @@ struct PayloadCommandRequestStatusCommand
 	unsigned char ID; // ID команды, статус которой нужно получить
 	unsigned long long timeusec; // Метка времени
 };
-
 struct PayloadCommandChangeNav // Команда о смене системы навигации
 { 
 	unsigned char commandID; // ID команды
