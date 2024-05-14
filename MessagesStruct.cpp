@@ -40,6 +40,8 @@ struct Header //Header сообщений
 {
 	unsigned char stx;
 	MessagesId msgId;
+	unsigned char srcId;
+	unsigned char dstId;
 	unsigned char lenPayload;
 	unsigned short crc;
 	unsigned char payload[];
